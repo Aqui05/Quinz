@@ -1,10 +1,10 @@
 const express = require('express');
 const connectDB = require('./db');
-const menuRoutes = require('./routes/menu');
-const orderRoutes = require('./routes/order');
+const menuRoutes = require('./routes/Menu');
+const orderRoutes = require('./routes/Order');
 
 const app = express();
-const port = 3000;
+const port = 4000;
 
 // Connect to MongoDB
 connectDB();
