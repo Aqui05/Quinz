@@ -1,10 +1,16 @@
 const express = require('express');
+const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
 const connectDB = require('./db');
 const menuRoutes = require('./routes/Menu');
 const orderRoutes = require('./routes/Order');
+const cors = require('cors');
 
 const app = express();
-const port = 4000;
+const port = 5000;
+
+app.use(cors());
+app.use(bodyParser.json());
 
 // Connect to MongoDB
 connectDB();
@@ -18,9 +24,7 @@ app.use('/api/menus', menuRoutes);
 // Use order routes
 app.use('/api/orders', orderRoutes);
 
-// Start the server on port 3000
-
 
 app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}/`);
+    console.log(`Serveur en cours d'exécution sur le port ${port}`);
 });
