@@ -4,6 +4,55 @@ const Order = require('../models/Order');
 const Menu = require('../models/Menu');
 const { v4: uuidv4 } = require('uuid'); // Pour générer un reçu unique
 
+
+const mongoose = require('mongoose');
+const { v4: uuidv4 } = require('uuid');
+
+// Fonction pour formater le prix
+const formatPrice = (price) => {
+    return price.toFixed(2);
+};
+
+// Fonction pour générer le reçu
+const generateReceipt = async (order) => {
+    let receiptText = '';
+    
+    // En-tête du reçu
+    receiptText += '==================================\n';
+    receiptText += '           REÇU DE COMMANDE       \n';
+    receiptText += '==================================\n\n';
+    
+    // Numéro de commande et date
+    receiptText += `Commande #: ${order._id}\n`;
+    receiptText += `Date: ${order.date.toLocaleString()}\n\n`;
+    
+    // Détails des articles
+    receiptText += 'Articles:\n';
+    receiptText += '--------------------------------\n';
+    
+    for (const item of order.items) {
+        const menuItem = await mongoose.model('Menu').findById(item.menuItem);
+        receiptText += `${menuItem.name} x${item.quantity}\n`;
+        receiptText += `  Prix unitaire: $${formatPrice(menuItem.price)}\n`;
+        receiptText += `  Sous-total: $${formatPrice(menuItem.price * item.quantity)}\n\n`;
+    }
+    
+    receiptText += '--------------------------------\n';
+    
+    // Total
+    receiptText += `TOTAL: $${formatPrice(order.total)}\n\n`;
+    
+    // Numéro de reçu unique
+    receiptText += `Numéro de reçu: ${uuidv4()}\n`;
+    
+    // Pied de page
+    receiptText += '==================================\n';
+    receiptText += '       Merci de votre achat !     \n';
+    receiptText += '==================================\n';
+    
+    return receiptText;
+};
+
 // Ajouter une nouvelle commande
 router.post('/add', async (req, res) => {
     try {
@@ -34,18 +83,37 @@ router.post('/add', async (req, res) => {
         const newOrder = new Order({
             items,
             total,
-            receipt
+            receipt: uuidv4()
         });
 
         // Enregistrer la commande dans la base de données
         await newOrder.save();
 
+        // Générer le reçu
+        const receiptText = await generateReceipt(newOrder);
+
         // Répondre avec la commande nouvellement créée
-        res.status(201).json(newOrder);
+        res.status(201).json({
+            Order: newOrder,
+            receipt: receiptText
+    });
     } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Failed to create order' });
     }
 });
+
+
+//liste order
+router.get('/', async(req, res) => {
+    try {
+            const orders = await Orders.find();
+            res.status(200).send(orders);
+        } catch (error) {
+            res.status(500).send(error);
+        }
+})
+
+
 
 module.exports = router;
