@@ -6,7 +6,6 @@ const { v4: uuidv4 } = require('uuid'); // Pour générer un reçu unique
 
 
 const mongoose = require('mongoose');
-const { v4: uuidv4 } = require('uuid');
 
 // Fonction pour formater le prix
 const formatPrice = (price) => {
